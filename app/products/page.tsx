@@ -35,6 +35,10 @@ export default function ProductsPage() {
 
   const loadProducts = async () => {
     const res = await fetch('/api/products');
+    if (!res.ok) {
+      setError('Gagal memuat produk.');
+      return;
+    }
     const data = await res.json();
     setProducts(data);
   };
@@ -94,7 +98,8 @@ export default function ProductsPage() {
 
     setToast(selected ? 'Produk berhasil diupdate.' : 'Produk berhasil ditambahkan.');
     resetForm();
-    loadProducts();
+    setProducts((current) => [data, ...current]);
+    await loadProducts();
   };
 
   const handleEdit = (product: Product) => {
