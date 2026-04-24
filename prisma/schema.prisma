@@ -10,6 +10,7 @@ datasource db {
 model Product {
   id           Int               @id @default(autoincrement())
   name         String
+  category     String            @default("")
   costPrice    Float
   sellingPrice Float
   stock        Int

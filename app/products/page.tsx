@@ -9,6 +9,7 @@ import Toast from '@/components/Toast';
 type Product = {
   id: number;
   name: string;
+  category: string;
   costPrice: number;
   sellingPrice: number;
   stock: number;
@@ -18,6 +19,7 @@ export default function ProductsPage() {
   const { user } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [name, setName] = useState('');
+  const [category, setCategory] = useState('Makanan');
   const [costPrice, setCostPrice] = useState('');
   const [sellingPrice, setSellingPrice] = useState('');
   const [stock, setStock] = useState('');
@@ -39,6 +41,7 @@ export default function ProductsPage() {
 
   const resetForm = () => {
     setName('');
+    setCategory('Makanan');
     setCostPrice('');
     setSellingPrice('');
     setStock('');
@@ -47,7 +50,7 @@ export default function ProductsPage() {
   };
 
   const validate = () => {
-    if (!name.trim() || !costPrice || !sellingPrice || !stock) {
+    if (!name.trim() || costPrice.trim() === '' || sellingPrice.trim() === '' || stock.trim() === '') {
       return 'Semua input wajib diisi.';
     }
     if (Number(costPrice) < 0 || Number(sellingPrice) < 0 || Number(stock) < 0) {
@@ -69,27 +72,27 @@ export default function ProductsPage() {
 
     const payload = {
       name: name.trim(),
+      category: category.trim(),
       costPrice: Number(costPrice),
       sellingPrice: Number(sellingPrice),
       stock: Number(stock)
     };
 
-    if (selected) {
-      await fetch(`/api/products/${selected.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      setToast('Produk berhasil diupdate.');
-    } else {
-      await fetch('/api/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      setToast('Produk berhasil ditambahkan.');
+    const endpoint = selected ? `/api/products/${selected.id}` : '/api/products';
+    const method = selected ? 'PATCH' : 'POST';
+    const response = await fetch(endpoint, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      setError(data.message || 'Gagal menyimpan produk.');
+      return;
     }
 
+    setToast(selected ? 'Produk berhasil diupdate.' : 'Produk berhasil ditambahkan.');
     resetForm();
     loadProducts();
   };
@@ -97,6 +100,7 @@ export default function ProductsPage() {
   const handleEdit = (product: Product) => {
     setSelected(product);
     setName(product.name);
+    setCategory(product.category);
     setCostPrice(String(product.costPrice));
     setSellingPrice(String(product.sellingPrice));
     setStock(String(product.stock));
@@ -144,9 +148,23 @@ export default function ProductsPage() {
                   <input
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-slate-900"
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none transition duration-150 focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
                     placeholder="Contoh: Sabun cuci"
                   />
+                </label>
+                <label className="block">
+                  <span className="text-sm font-medium text-slate-700">Kategori</span>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none transition duration-150 focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+                  >
+                    <option>Minuman</option>
+                    <option>Makanan</option>
+                    <option>Peralatan</option>
+                    <option>Perawatan</option>
+                    <option>Lainnya</option>
+                  </select>
                 </label>
                 <label className="block">
                   <span className="text-sm font-medium text-slate-700">Harga Beli</span>
@@ -154,7 +172,7 @@ export default function ProductsPage() {
                     type="number"
                     value={costPrice}
                     onChange={(e) => setCostPrice(e.target.value)}
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-slate-900"
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none transition duration-150 focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
                     min="0"
                   />
                 </label>
@@ -164,7 +182,7 @@ export default function ProductsPage() {
                     type="number"
                     value={sellingPrice}
                     onChange={(e) => setSellingPrice(e.target.value)}
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-slate-900"
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none transition duration-150 focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
                     min="0"
                   />
                 </label>
@@ -174,7 +192,7 @@ export default function ProductsPage() {
                     type="number"
                     value={stock}
                     onChange={(e) => setStock(e.target.value)}
-                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none focus:border-slate-900"
+                    className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 outline-none transition duration-150 focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
                     min="0"
                   />
                 </label>
@@ -191,7 +209,7 @@ export default function ProductsPage() {
                     </button>
                     <button
                       type="submit"
-                      className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-700"
+                      className="rounded-2xl bg-gradient-to-r from-sky-600 to-cyan-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-200/30 transition hover:from-sky-700 hover:to-cyan-600"
                     >
                       {selected ? 'Update Produk' : 'Tambah Produk'}
                     </button>
@@ -213,6 +231,7 @@ export default function ProductsPage() {
                   <thead className="bg-slate-50 text-left text-xs uppercase tracking-[0.2em] text-slate-500">
                     <tr>
                       <th className="px-4 py-3">Nama</th>
+                      <th className="px-4 py-3">Kategori</th>
                       <th className="px-4 py-3">Harga Beli</th>
                       <th className="px-4 py-3">Harga Jual</th>
                       <th className="px-4 py-3">Stok</th>
@@ -223,6 +242,11 @@ export default function ProductsPage() {
                     {products.map((product) => (
                       <tr key={product.id}>
                         <td className="px-4 py-4 font-medium text-slate-900">{product.name}</td>
+                        <td className="px-4 py-4">
+                          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-slate-700">
+                            {product.category}
+                          </span>
+                        </td>
                         <td className="px-4 py-4">Rp {formatRupiah(product.costPrice)}</td>
                         <td className="px-4 py-4">Rp {formatRupiah(product.sellingPrice)}</td>
                         <td className="px-4 py-4">

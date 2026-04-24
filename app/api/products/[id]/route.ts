@@ -4,9 +4,9 @@ import { prisma } from '@/lib/prisma';
 export async function PATCH(req: Request, context: any) {
   const id = Number(context.params.id);
   const body = await req.json();
-  const { name, costPrice, sellingPrice, stock } = body;
+  const { name, category, costPrice, sellingPrice, stock } = body;
 
-  if (!name || costPrice == null || sellingPrice == null || stock == null) {
+  if (!name || category == null || costPrice == null || sellingPrice == null || stock == null) {
     return NextResponse.json({ message: 'Semua field diperlukan.' }, { status: 400 });
   }
 
@@ -14,6 +14,7 @@ export async function PATCH(req: Request, context: any) {
     where: { id },
     data: {
       name: String(name).trim(),
+      category: String(category).trim(),
       costPrice: Number(costPrice),
       sellingPrice: Number(sellingPrice),
       stock: Number(stock)

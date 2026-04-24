@@ -8,9 +8,9 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const { name, costPrice, sellingPrice, stock } = body;
+  const { name, category, costPrice, sellingPrice, stock } = body;
 
-  if (!name || costPrice == null || sellingPrice == null || stock == null) {
+  if (!name || category == null || costPrice == null || sellingPrice == null || stock == null) {
     return NextResponse.json({ message: 'Semua field diperlukan.' }, { status: 400 });
   }
 
@@ -21,6 +21,7 @@ export async function POST(req: Request) {
   const product = await prisma.product.create({
     data: {
       name: String(name).trim(),
+      category: String(category).trim(),
       costPrice: Number(costPrice),
       sellingPrice: Number(sellingPrice),
       stock: Number(stock)

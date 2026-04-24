@@ -63,7 +63,7 @@ export default function SalesPage() {
       return;
     }
     const qty = Number(quantity);
-    if (qty <= 0) {
+    if (quantity.trim() === '' || Number.isNaN(qty) || qty <= 0) {
       setError('Jumlah harus lebih besar dari 0.');
       return;
     }
@@ -90,6 +90,7 @@ export default function SalesPage() {
         }
       ];
     });
+    setQuantity('1');
     setError(null);
     setToast('Item ditambahkan ke keranjang.');
   };
@@ -116,20 +117,20 @@ export default function SalesPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
+    const data = await res.json();
 
     if (!res.ok) {
-      const data = await res.json();
       setError(data.message || 'Gagal menyimpan transaksi.');
       return;
     }
 
     setCart([]);
+    setQuantity('1');
     loadProducts();
     loadHistory();
     setToast('Transaksi berhasil disimpan.');
     setError(null);
   };
-
   const handleDeleteTransaction = async (id: number) => {
     if (!confirm('Hapus riwayat transaksi ini?')) return;
     await fetch(`/api/transactions/${id}`, { method: 'DELETE' });
@@ -145,12 +146,16 @@ export default function SalesPage() {
           <Navbar />
           <div className="space-y-6">
             <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-soft">
-              <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="text-2xl font-semibold text-slate-900">Transaksi Penjualan</h2>
-                  <p className="text-sm text-slate-500">Pilih barang, tambah ke keranjang, dan simpan transaksi.</p>
+              <div className="mb-5 rounded-3xl bg-gradient-to-r from-blue-600 via-cyan-500 to-slate-900 p-6 text-white shadow-2xl shadow-cyan-500/10">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-3xl font-semibold">Transaksi Penjualan</h2>
+                    <p className="mt-2 max-w-2xl text-sm text-cyan-100">Pilih barang, tambah ke keranjang, dan simpan transaksi. Semua penjualan otomatis tersimpan dalam database.</p>
+                  </div>
+                  <div className="rounded-3xl bg-white/10 px-4 py-3 text-sm font-semibold text-white backdrop-blur-sm">
+                    {user?.role === 'admin' ? 'Mode Admin' : 'Mode Kasir'}
+                  </div>
                 </div>
-                <div className="rounded-3xl bg-slate-100 px-4 py-3 text-sm text-slate-700">{user?.role === 'admin' ? 'Mode Admin' : 'Mode Kasir'}</div>
               </div>
 
               <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
@@ -187,11 +192,14 @@ export default function SalesPage() {
                     <div>
                       <p className="text-sm text-slate-500">Harga jual:</p>
                       <p className="text-lg font-semibold text-slate-900">Rp {selectedProduct ? selectedProduct.sellingPrice.toLocaleString('id-ID') : '0'}</p>
+                      {selectedProduct ? (
+                        <p className="mt-1 text-xs text-slate-500">Stok tersedia: {selectedProduct.stock}</p>
+                      ) : null}
                     </div>
                     <button
                       type="button"
                       onClick={handleAddToCart}
-                      className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white hover:bg-slate-700"
+                      className="rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-emerald-300/30 transition hover:from-emerald-700 hover:to-teal-600"
                     >
                       Tambah ke Keranjang
                     </button>
@@ -205,7 +213,7 @@ export default function SalesPage() {
                       <p className="text-sm text-slate-500">Keranjang kosong.</p>
                     ) : (
                       cart.map((item) => (
-                        <div key={item.productId} className="flex items-center justify-between rounded-3xl bg-slate-50 px-4 py-3">
+                        <div key={item.productId} className="flex items-center justify-between rounded-3xl bg-gradient-to-r from-slate-50 via-slate-100 to-slate-50 px-4 py-3 shadow-sm shadow-slate-200">
                           <div>
                             <p className="font-medium text-slate-900">{item.name}</p>
                             <p className="text-sm text-slate-500">{item.quantity} x Rp {item.sellingPrice.toLocaleString('id-ID')}</p>
@@ -213,7 +221,7 @@ export default function SalesPage() {
                           <button
                             type="button"
                             onClick={() => removeCartItem(item.productId)}
-                            className="text-xs font-semibold text-rose-600 hover:text-rose-800"
+                            className="rounded-full border border-rose-300 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
                           >
                             Hapus
                           </button>
@@ -234,7 +242,7 @@ export default function SalesPage() {
                   <button
                     type="button"
                     onClick={handleCompleteSale}
-                    className="mt-4 w-full rounded-2xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-500"
+                    className="mt-4 w-full rounded-2xl bg-gradient-to-r from-fuchsia-600 to-pink-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-pink-300/20 transition hover:from-fuchsia-700 hover:to-pink-600"
                   >
                     Selesaikan Transaksi
                   </button>
