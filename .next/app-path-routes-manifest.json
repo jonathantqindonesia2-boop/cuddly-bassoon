@@ -1,0 +1,13 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/api/products/[id]/route": "/api/products/[id]",
+  "/api/products/route": "/api/products",
+  "/api/reports/route": "/api/reports",
+  "/api/transactions/[id]/route": "/api/transactions/[id]",
+  "/api/transactions/route": "/api/transactions",
+  "/login/page": "/login",
+  "/page": "/",
+  "/products/page": "/products",
+  "/reports/page": "/reports",
+  "/sales/page": "/sales"
+}
