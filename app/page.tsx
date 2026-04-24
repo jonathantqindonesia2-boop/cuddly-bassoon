@@ -35,9 +35,9 @@ export default function DashboardPage() {
       const productsData = await productsRes.json();
 
       setSummary({
-        totalSales: summaryData.totalSales,
-        totalProfit: summaryData.totalProfit,
-        transactionCount: summaryData.count,
+        totalSales: summaryData.summary.totalSales,
+        totalProfit: summaryData.summary.totalProfit,
+        transactionCount: summaryData.summary.count,
         lowStockCount: productsData.filter((item: Product) => item.stock < 5).length,
         totalStock: productsData.reduce((sum: number, item: Product) => sum + item.stock, 0)
       });

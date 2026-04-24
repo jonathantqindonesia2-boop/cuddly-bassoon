@@ -5,9 +5,9 @@
   "/api/reports/route": "/api/reports",
   "/api/transactions/[id]/route": "/api/transactions/[id]",
   "/api/transactions/route": "/api/transactions",
-  "/page": "/",
   "/login/page": "/login",
   "/products/page": "/products",
-  "/reports/page": "/reports",
-  "/sales/page": "/sales"
+  "/sales/page": "/sales",
+  "/page": "/",
+  "/reports/page": "/reports"
 }
