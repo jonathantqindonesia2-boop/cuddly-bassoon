@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import RequireAuth from '@/components/RequireAuth';
 import { useAuth } from '@/components/AuthProvider';
@@ -34,16 +34,16 @@ export default function ReportsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [toast, setToast] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadReport();
-  }, [date]);
-
-  const loadReport = async () => {
+  const loadReport = useCallback(async () => {
     const res = await fetch(`/api/reports?date=${date}`);
     const data = await res.json();
     setSummary(data.summary);
     setTransactions(data.transactions);
-  };
+  }, [date]);
+
+  useEffect(() => {
+    loadReport();
+  }, [loadReport]);
 
   const totalItems = useMemo(
     () => transactions.reduce((sum, tx) => sum + tx.items.reduce((count, item) => count + item.quantity, 0), 0),

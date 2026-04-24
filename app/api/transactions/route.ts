@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+interface CartItem {
+  productId: number;
+  quantity: number;
+}
+
 export async function GET() {
   const transactions = await prisma.transaction.findMany({
     orderBy: { createdAt: 'desc' },
@@ -12,16 +17,16 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { items } = body;
+    const { items }: { items: CartItem[] } = body;
 
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ message: 'Keranjang kosong.' }, { status: 400 });
     }
 
-    const productIds = items.map((item: any) => item.productId);
+    const productIds = items.map((item) => item.productId);
     const products = await prisma.product.findMany({ where: { id: { in: productIds } } });
 
-    const lineItems = items.map((item: any) => {
+    const lineItems = items.map((item) => {
       const product = products.find((product) => product.id === item.productId);
       if (!product) {
         throw new Error('Produk tidak ditemukan.');

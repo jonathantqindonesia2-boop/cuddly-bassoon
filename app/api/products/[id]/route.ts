@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function PATCH(req: Request, context: any) {
-  const id = Number(context.params.id);
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const body = await req.json();
   const { name, category, costPrice, sellingPrice, stock } = body;
 
@@ -11,7 +11,7 @@ export async function PATCH(req: Request, context: any) {
   }
 
   const product = await prisma.product.update({
-    where: { id },
+    where: { id: Number(id) },
     data: {
       name: String(name).trim(),
       category: String(category).trim(),
@@ -24,8 +24,8 @@ export async function PATCH(req: Request, context: any) {
   return NextResponse.json(product);
 }
 
-export async function DELETE(_req: Request, context: any) {
-  const id = Number(context.params.id);
-  await prisma.product.delete({ where: { id } });
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  await prisma.product.delete({ where: { id: Number(id) } });
   return NextResponse.json({ ok: true });
 }
